@@ -1,5 +1,9 @@
 import stripe
 
+# # # # # # #
+# Note
+# Mixins purposely do not use the property decorator syntax so the
+# getter method can be overridden or extended easily.
 
 def _get_attr_value(instance, attr, default=None):
     """
@@ -31,6 +35,36 @@ def _get_attr_value(instance, attr, default=None):
         if callable(value):
             value = value()
     return value
+
+
+class StripeSyncMixin(object):
+    """
+    Provides 3 properties to help with syncing data with Stripe.
+    
+    stripe_sync_kwargs should be a dictionary of arguments to pass to
+    stripe_create_method.
+    
+    stripe_create_method can be a string or callable. If a string is provided
+    it should start with the stripe method and not include the stripe instance.
+    e.g.
+        self.stripe_sync_method = self.stripe.Customer.create
+        or
+        self.stripe_sync_method = 'Customer.create'
+    
+    """
+    stripe_sync = False
+    stripe_sync_kwargs = {}
+    stripe_sync_method = ''
+    
+    def stripe_sync(self):
+        if self.stripe_sync and self.stripe_sync_kwargs and self.stripe_sync_method:
+            stripe_method = self.stripe_method
+            if not callable(stripe_method):
+                stripe_method = self.stripe
+                for method_part in self.stripe_sync_method.split('.'):
+                    stripe_method = getattr(stripe_method, method_part)
+            if callable(stripe_method):
+                stripe_method(**self.stripe_sync_kwargs)
 
 
 class StripeMixin(object):
