@@ -52,7 +52,7 @@ class StripeSyncMixin(object):
         self.stripe_sync_method = 'Customer.create'
     
     """
-    stripe_sync = False
+    stripe_sync_enabled = False
     stripe_sync_kwargs = {}
     stripe_sync_method = ''
     
